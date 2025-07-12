@@ -24,18 +24,19 @@ jobs:
       run: zip -r app.zip . -x ".git/*" "node_modules/*" "*.gitignore"
 
     - name: Upload ZIP to S3
-      run: aws s3 cp app.zip s3://beanstalk-bucket12/app-${{ github.run_id }}.zip
+      run: aws s3 cp app.zip s3://$S3_BUCKET/app-${{ github.run_id }}.zip
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
+        S3_BUCKET: ${{ secrets.S3_BUCKET }}
 
     - name: Create Beanstalk App Version
       run: |
-        echo "Creating version: v${{ github.run_id }}"
+        echo "Creating version: v-${{ github.run_id }}"
         aws elasticbeanstalk create-application-version \
           --application-name "${{ secrets.EB_APP_NAME }}" \
-          --version-label "v${{ github.run_id }}" \
+          --version-label "v-${{ github.run_id }}" \
           --source-bundle S3Bucket=${{ secrets.S3_BUCKET }},S3Key=app-${{ github.run_id }}.zip \
           --region ${{ secrets.AWS_REGION }}
       env:
@@ -45,10 +46,10 @@ jobs:
 
     - name: Update Beanstalk Environment
       run: |
-        echo "Updating environment to version v${{ github.run_id }}"
+        echo "Updating environment to version v-${{ github.run_id }}"
         aws elasticbeanstalk update-environment \
           --environment-name "${{ secrets.EB_ENV_NAME }}" \
-          --version-label "v${{ github.run_id }}" \
+          --version-label "v-${{ github.run_id }}" \
           --region ${{ secrets.AWS_REGION }}
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
