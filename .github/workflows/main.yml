@@ -30,6 +30,10 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
 
+    - name: Debug App Name
+      run: echo "App name is: ${{ secrets.EB_APP_NAME }}"
+
+
     - name: Create Beanstalk App Version
       run: |
         echo "Creating version: v${{ github.run_number }}"
